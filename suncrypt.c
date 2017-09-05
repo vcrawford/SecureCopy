@@ -2,7 +2,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
+#include <getopt.h>
+#include <gcrypt.h>
 
 int main(int argc, char* argv[]) {
 
@@ -118,9 +119,24 @@ int main(int argc, char* argv[]) {
 
    // take in the user's password
 
-   printf("Please input your password to encrypt the file %s:", plntxt_nm);
-   char* password;
+   printf("Password (maximum of 100 characters): ");
+   char password [100];
    scanf("%s", password);
 
+   // now generate a key using that password
+
+   char salt [5] = "NaCl";
+   unsigned char key [64];
+
+   gcry_kdf_derive(password, strlen(password), GCRY_KDF_PBKDF2, GCRY_MD_SHA512, salt, 4, 4096, 64, key);
+
+   printf("Key: ");
+
+   for (int i = 0; i < 64; i++) {
+
+      printf("%X ", key[i]);
+   }
+   
+   printf("\n");
 }
 
