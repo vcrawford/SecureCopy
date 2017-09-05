@@ -117,11 +117,13 @@ int main(int argc, char* argv[]) {
       exit(EXIT_FAILURE);
    }
 
+
    // take in the user's password
 
    printf("Password (maximum of 100 characters): ");
    char password [100];
    scanf("%s", password);
+
 
    // now generate a key using that password
 
@@ -138,5 +140,63 @@ int main(int argc, char* argv[]) {
    }
    
    printf("\n");
+
+
+   // read in the file
+   
+   char c;
+   int file_size = 0;
+
+   while ((c = getc(plntxt)) != EOF) {
+
+      file_size++;
+   }
+
+   char input [file_size];
+
+   rewind(plntxt);
+
+   int i = 0;
+
+   while ((c = getc(plntxt)) != EOF) {
+
+      input[i] = c;
+      i++;
+   }
+
+   // encrypt the file
+
+   gcry_cipher_hd_t handle;
+   gcry_cipher_open(&handle, GCRY_CIPHER_RIJNDAEL128, GCRY_CIPHER_MODE_CFB, 0);
+   gcry_cipher_setkey(handle, key, 64);
+
+   char iv [16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 212};
+   //unsigned short iv = 5844; 
+   gcry_cipher_setiv(handle, &iv, 16);
+
+   for (int i = 0; i < file_size; i++) {
+
+      printf("%c,", input[i]);
+   }
+
+   gcry_cipher_encrypt(handle, input, file_size, NULL, 0);
+
+
+   for (int i = 0; i < file_size; i++) {
+
+      printf("%c,", input[i]);
+   }
+
+   printf("\n");
+
+   gcry_cipher_decrypt(handle, input, file_size, NULL, 0);
+
+   for (int i = 0; i < file_size; i++) {
+
+      printf("%c,", input[i]);
+   }
+
+   printf("\n");
+
 }
 
