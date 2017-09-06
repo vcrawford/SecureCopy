@@ -128,13 +128,13 @@ int main(int argc, char* argv[]) {
    // now generate a key using that password
 
    char salt [5] = "NaCl";
-   unsigned char key [64];
+   unsigned char key [16];
 
-   gcry_kdf_derive(password, strlen(password), GCRY_KDF_PBKDF2, GCRY_MD_SHA512, salt, 4, 4096, 64, key);
+   gcry_kdf_derive(password, strlen(password), GCRY_KDF_PBKDF2, GCRY_MD_SHA512, salt, 4, 4096, 16, key);
 
    printf("Key: ");
 
-   for (int i = 0; i < 64; i++) {
+   for (int i = 0; i < 16; i++) {
 
       printf("%X ", key[i]);
    }
@@ -168,9 +168,10 @@ int main(int argc, char* argv[]) {
 
    gcry_cipher_hd_t handle;
    gcry_cipher_open(&handle, GCRY_CIPHER_RIJNDAEL128, GCRY_CIPHER_MODE_CFB, 0);
-   gcry_cipher_setkey(handle, key, 64);
+   gcry_cipher_setkey(handle, key, 16);
 
    char iv [16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 212};
+   //char iv [16] = "just for testing";
    //unsigned short iv = 5844; 
    gcry_cipher_setiv(handle, &iv, 16);
 
@@ -181,7 +182,6 @@ int main(int argc, char* argv[]) {
 
    gcry_cipher_encrypt(handle, input, file_size, NULL, 0);
 
-
    for (int i = 0; i < file_size; i++) {
 
       printf("%c,", input[i]);
@@ -189,6 +189,7 @@ int main(int argc, char* argv[]) {
 
    printf("\n");
 
+   gcry_cipher_setiv(handle, &iv, 16);
    gcry_cipher_decrypt(handle, input, file_size, NULL, 0);
 
    for (int i = 0; i < file_size; i++) {
